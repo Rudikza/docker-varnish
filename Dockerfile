@@ -1,7 +1,7 @@
-FROM vixns/base
-MAINTAINER Stéphane Cottin <stephane.cottin@vixns.com>
+FROM debian:jessie
+MAINTAINER Rudi Kramer <rudi.kramer@gmail.com>
 
-RUN \
+RUN apt-get update && apt-get install -y curl python --no-install-recommends && rm -r /var/lib/apt/lists/* && \
   export DEBIAN_FRONTEND=noninteractive && \
   curl -k -s https://repo.varnish-cache.org/GPG-key.txt | apt-key add - && \
   apt-get update && apt-get install -y apt-transport-https && \
@@ -10,12 +10,8 @@ RUN \
   apt-get -y install varnish && \
   rm -rf /var/lib/apt/lists/*
 
-ENV VCL_CONFIG      /etc/varnish/default.vcl
-ENV STORAGE_BACKEND malloc
-ENV CACHE_SIZE      64m
-ENV TELNET_PORT	    6082
-ENV LISTEN_PORT	    6086
-ENV VARNISHD_PARAMS -p default_ttl=3600 -p default_grace=3600
 
-COPY start.sh /start.sh
-CMD ["/start.sh"]
+ADD varnish /etc/default/varnish
+COPY ./docker-entrypoint.sh /
+
+CMD ["/docker-entrypoint.sh"]
